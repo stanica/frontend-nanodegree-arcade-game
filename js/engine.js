@@ -24,6 +24,12 @@ var Engine = (function(global) {
         canvas = doc.createElement('canvas'),
         ctx = canvas.getContext('2d'),
         lastTime;
+        spriteWidth = 101;
+        spriteHeight = 171;
+        canvasHeight = 606;
+        canvasWidth = 505;
+        numCols = 5;
+        numRows = 6;
 
     canvas.width = 505;
     canvas.height = 606;
@@ -115,9 +121,18 @@ var Engine = (function(global) {
                 'images/grass-block.png',   // Row 1 of 2 of grass
                 'images/grass-block.png'    // Row 2 of 2 of grass
             ],
-            numRows = 6,
-            numCols = 5,
+            numRows = window.numRows,
+            numCols = window.numCols,
             row, col;
+
+        /* Set the canvas dimensions based on how many rows and columns
+         * of blocks we have. Since roughly 40% of the block sprite is
+         * transparent, we multiply the canvas height by 0.6.
+         */
+        canvas.width = numCols * spriteWidth;
+        canvas.height = numRows * spriteHeight * 0.6;
+        canvasWidth = canvas.width;
+        canvasHeight = canvas.height;
 
         /* Loop through the number of rows and columns we've defined above
          * and, using the rowImages array, draw the correct image for that
