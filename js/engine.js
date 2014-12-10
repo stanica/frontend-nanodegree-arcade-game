@@ -24,16 +24,24 @@ var Engine = (function(global) {
         canvas = doc.createElement('canvas'),
         ctx = canvas.getContext('2d'),
         lastTime;
-        spriteWidth = 101;
-        spriteHeight = 171;
-        canvasHeight = 606;
-        canvasWidth = 505;
-        numCols = 5;
-        numRows = 6;
-
-    canvas.width = 505;
-    canvas.height = 606;
-    doc.body.appendChild(canvas);
+        this.spriteWidth = 101;
+        this.spriteHeight = 171;
+        this.canvasHeight = 606;
+        this.canvasWidth = 505;
+        this.level = 0;
+        var rowImages = [
+            'images/water-block.png',   // Top row is water
+            'images/stone-block.png',   // Row 1 of 3 of stone
+            'images/stone-block.png',   // Row 2 of 3 of stone
+            'images/stone-block.png',   // Row 3 of 3 of stone
+            'images/grass-block.png',   // Row 1 of 2 of grass
+            'images/grass-block.png'    // Row 2 of 2 of grass
+        ];
+        this.numCols = 5;
+        this.numRows = rowImages.length;
+        canvas.width = 505;
+        canvas.height = 606;
+        doc.body.appendChild(canvas);
 
     /* This function serves as the kickoff point for the game loop itself
      * and handles properly calling the update and render methods.
@@ -113,26 +121,17 @@ var Engine = (function(global) {
         /* This array holds the relative URL to the image used
          * for that particular row of the game level.
          */
-        var rowImages = [
-                'images/water-block.png',   // Top row is water
-                'images/stone-block.png',   // Row 1 of 3 of stone
-                'images/stone-block.png',   // Row 2 of 3 of stone
-                'images/stone-block.png',   // Row 3 of 3 of stone
-                'images/grass-block.png',   // Row 1 of 2 of grass
-                'images/grass-block.png'    // Row 2 of 2 of grass
-            ],
-            numRows = window.numRows,
-            numCols = window.numCols,
+           var numRows = numRows = rowImages.length,
+            numCols = this.numCols,
             row, col;
-
         /* Set the canvas dimensions based on how many rows and columns
          * of blocks we have. Since roughly 40% of the block sprite is
          * transparent, we multiply the canvas height by 0.6.
          */
         canvas.width = numCols * spriteWidth;
-        canvas.height = numRows * spriteHeight * 0.6;
-        canvasWidth = canvas.width;
-        canvasHeight = canvas.height;
+        canvas.height = numRows * spriteHeight * 0.58;
+        this.canvasWidth = canvas.width;
+        this.canvasHeight = canvas.height;
 
         /* Loop through the number of rows and columns we've defined above
          * and, using the rowImages array, draw the correct image for that
@@ -196,4 +195,15 @@ var Engine = (function(global) {
      * from within their app.js files.
      */
     global.ctx = ctx;
+
+    /* Helper methods to modify engine variables */
+    global.expandBoard = function () {
+        if (rowImages.length < 9){
+            rowImages.splice(1,0,"images/stone-block.png");
+            numRows = rowImages.length;
+        }
+        else if (rowImages.length > 8 && numCols <8){
+            numCols+=2;
+        }
+    }
 })(this);
