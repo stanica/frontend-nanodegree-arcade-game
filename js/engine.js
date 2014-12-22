@@ -24,11 +24,23 @@ var Engine = (function(global) {
         canvas = doc.createElement('canvas'),
         ctx = canvas.getContext('2d'),
         lastTime;
+
+        /* Global variables used to calculate positioning as well
+         * as keep track of current game level.
+         */
         this.spriteWidth = 101;
+        /* Note that the height of each image file is 171 pixels
+         * but the sprites themselves are less.
+         */
         this.spriteHeight = 171;
-        this.canvasHeight = 606;
-        this.canvasWidth = 505;
+        this.canvasHeight = canvas.height;
+        this.canvasWidth = canvas.width;
         this.level = 0;
+
+        /* This array holds the relative URL to the image used
+         * for that particular row of the game level. It will
+         * increase in length as the game level increases.
+         */
         var rowImages = [
             'images/water-block.png',   // Top row is water
             'images/stone-block.png',   // Row 1 of 3 of stone
@@ -37,10 +49,14 @@ var Engine = (function(global) {
             'images/grass-block.png',   // Row 1 of 2 of grass
             'images/grass-block.png'    // Row 2 of 2 of grass
         ];
+
+        //Global variables used to calculate positioning
         this.numCols = 5;
         this.numRows = rowImages.length;
+
         canvas.width = 505;
-        canvas.height = 606;
+        canvas.height = numRows * spriteHeight * 0.58;
+        this.canvasHeight = canvas.height;
         doc.body.appendChild(canvas);
 
     /* This function serves as the kickoff point for the game loop itself
@@ -118,18 +134,19 @@ var Engine = (function(global) {
      * they are just drawing the entire screen over and over.
      */
     function render() {
-        /* This array holds the relative URL to the image used
-         * for that particular row of the game level.
+        /* Update the number of rows and columns each frame before rendering
+         * in case board size has changed.
          */
-           var numRows = numRows = rowImages.length,
+        var numRows = numRows = rowImages.length,
             numCols = this.numCols,
             row, col;
-        /* Set the canvas dimensions based on how many rows and columns
-         * of blocks we have. Since roughly 40% of the block sprite is
-         * transparent, we multiply the canvas height by 0.6.
+        /* To get a pixel-perfect canvas size, set the canvas width and height
+         * to multiples of the rows and columns of blocks. The height of a
+         * block is 121 pixels so 38 needs to be added to the canvas height
+         * to display the bottom of the last block.
          */
         canvas.width = numCols * spriteWidth;
-        canvas.height = numRows * spriteHeight * 0.58;
+        canvas.height = numRows * 83 + 38;
         this.canvasWidth = canvas.width;
         this.canvasHeight = canvas.height;
 
@@ -139,18 +156,13 @@ var Engine = (function(global) {
          */
         for (row = 0; row < numRows; row++) {
             for (col = 0; col < numCols; col++) {
-                /* The drawImage function of the canvas' context element
-                 * requires 3 parameters: the image to draw, the x coordinate
-                 * to start drawing and the y coordinate to start drawing.
-                 * We're using our Resources helpers to refer to our images
-                 * so that we get the benefits of caching these images, since
-                 * we're using them over and over.
-                 */
-                ctx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83);
+                /* Since the provided images for the ground blocks occupy the bottom
+                * 121 pixels of the 171 pixel image height, offset the blocks by
+                * displaying them 50 pixels higher.
+                */
+                ctx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83-50);
             }
         }
-
-
         renderEntities();
     }
 
@@ -196,14 +208,31 @@ var Engine = (function(global) {
      */
     global.ctx = ctx;
 
-    /* Helper methods to modify engine variables */
-    global.expandBoard = function () {
-        if (rowImages.length < 9){
+    // Helper method to expand game board by row or column
+    global.expandBoard = function (direction) {
+        //Add a row to the board by splicing in an image to the array of
+        if (direction === "rows"){
             rowImages.splice(1,0,"images/stone-block.png");
             numRows = rowImages.length;
         }
-        else if (rowImages.length > 8 && numCols <8){
+        else {
             numCols+=2;
         }
-    }
+    };
+
+    /* Helper method to calculate collision between two rectangles
+     * http://stackoverflow.com/questions/8017541/javascript-canvas-collision-detection
+     */
+    global.rectCollision = function(x1, y1, size1, x2, y2, size2) {
+        var bottom1, bottom2, left1, left2, right1, right2, top1, top2;
+        left1 = x1 - size1;
+        right1 = x1 + size1;
+        top1 = y1 - size1;
+        bottom1 = y1 + size1;
+        left2 = x2 - size2;
+        right2 = x2 + size2;
+        top2 = y2 - size2;
+        bottom2 = y2 + size2;
+        return !(left1 > right2 || left2 > right1 || top1 > bottom2 || top2 > bottom1);
+    };
 })(this);

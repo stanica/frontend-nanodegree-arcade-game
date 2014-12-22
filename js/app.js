@@ -8,7 +8,7 @@ var Enemy = function() {
     this.sprite = 'images/enemy-bug.png';
     //Position enemy just off-screen and randomly
     this.x = -spriteWidth;
-    this.y = Math.floor(((Math.random()*(numRows-3))+1))*83 - 25;
+    this.y = Math.floor(((Math.random()*(numRows-3))))*83;
     this.speed = Math.floor( (Math.random()*3)*100 + 300 );
 };
 
@@ -21,7 +21,8 @@ Enemy.prototype.update = function(dt) {
     this.x += this.speed * dt;
     if (this.x > canvasWidth){
         this.x = -spriteWidth;
-        this.y = Math.floor(((Math.random()*(numRows-3))+1))*83 - 25;
+        //Randomize vertical position of the enemy to be between the water and grass tiles
+        this.y = Math.floor(((Math.random()*(numRows-3))))*83 + 10;
     }
 };
 
@@ -31,14 +32,18 @@ Enemy.prototype.render = function() {
 };
 
 var Player = function() {
-    //Set default player location to be center of screen
-    this.x = spriteWidth * Math.floor(numCols / 2);
-    this.y = canvasHeight - spriteHeight  - spriteHeight/3;
-
+    //Center player on board
+    this.resetPosition();
     this.sprite = 'images/char-boy.png';
 };
 Player.prototype.update = function(dt) {
 
+    for (var x=0; x<allEnemies.length; x++) {
+        if (rectCollision(this.x, this.y + 64, spriteWidth, allEnemies[x].x, allEnemies[x].y, spriteWidth)){
+            console.log(this.x, this.y);
+            this.resetPosition();
+        }
+    }
 };
 Player.prototype.render = function(){
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
@@ -50,24 +55,31 @@ Player.prototype.handleInput = function(key) {
     else if (key === "right" && this.x + spriteWidth * 2 <= canvasWidth){
         this.x += spriteWidth;
     }
-    else if (key === "up" && this.y - 83 >= 0){
+    else if (key === "up" && this.y - 38 >= 0){
         this.y -= 83;
     }
     else if (key === "down" && this.y + 83  < canvasHeight - spriteHeight){
         this.y += 83;
-        levelUp();
     }
 };
-var levelUp = function () {
+// Reset position of player to center of game board
+Player.prototype.resetPosition = function (){
+    //Center player horizontally
+    this.x = spriteWidth * Math.floor(numCols / 2);
+    //Position player on the lowest row of blocks
+    this.y = numRows * 83 - spriteHeight+5;
+};
+var levelUp = function (player) {
     level++;
-    if (level > 1){
-        expandBoard();
+    if (level > 1 && level < 4){
+        expandBoard("rows");
     }
     allEnemies = [];
     for (var x=0; x<level*3; x++) {
         var enemy = new Enemy();
         allEnemies.push(enemy);
     }
+    player.resetPosition();
 };
 
 // Now instantiate your objects.
@@ -75,7 +87,7 @@ var levelUp = function () {
 // Place the player object in a variable called player
 var player = new Player();
 var allEnemies = [];
-levelUp();
+levelUp(player);
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
