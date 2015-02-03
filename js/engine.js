@@ -25,13 +25,10 @@ var Engine = (function(global) {
         ctx = canvas.getContext('2d'),
         lastTime;
 
-        /* Global variables used to calculate positioning as well
-         * as keep track of current game level.
-         */
+        // Used for horizontal movement and as width of a tile
         this.spriteWidth = 101;
-        /* Note that the height of each image file is 171 pixels
-         * but the sprites themselves are less.
-         */
+
+        // Used for vertical movement
         this.spriteHeight = 171;
         this.canvasHeight = canvas.height;
         this.canvasWidth = canvas.width;
@@ -42,6 +39,7 @@ var Engine = (function(global) {
          * increase in length as the game level increases.
          */
         var rowImages = [
+            'images/blank-block.png',
             'images/water-block.png',   // Top row is water
             'images/stone-block.png',   // Row 1 of 3 of stone
             'images/stone-block.png',   // Row 2 of 3 of stone
@@ -50,7 +48,9 @@ var Engine = (function(global) {
             'images/grass-block.png'    // Row 2 of 2 of grass
         ];
 
-        //Global variables used to calculate positioning
+        /* Used to calculate positioning. Canvas width will be a
+         * function of
+         */
         this.numCols = 5;
         this.numRows = rowImages.length;
 
@@ -194,11 +194,13 @@ var Engine = (function(global) {
      * all of these images are properly loaded our game will start.
      */
     Resources.load([
+        'images/blank-block.png',
         'images/stone-block.png',
         'images/water-block.png',
         'images/grass-block.png',
         'images/enemy-bug.png',
-        'images/char-boy.png'
+        'images/char-boy.png',
+        'images/Heart.png'
     ]);
     Resources.onReady(init);
 
@@ -220,19 +222,16 @@ var Engine = (function(global) {
         }
     };
 
-    /* Helper method to calculate collision between two rectangles
-     * http://stackoverflow.com/questions/8017541/javascript-canvas-collision-detection
+    /* Helper method to calculate collision between two rectangles.
+     * http://stackoverflow.com/questions/2440377/javascript-collision-detection
+     * Dimensions are tweaked to allow some overlap
      */
-    global.rectCollision = function(x1, y1, size1, x2, y2, size2) {
-        var bottom1, bottom2, left1, left2, right1, right2, top1, top2;
-        left1 = x1 - size1;
-        right1 = x1 + size1;
-        top1 = y1 - size1;
-        bottom1 = y1 + size1;
-        left2 = x2 - size2;
-        right2 = x2 + size2;
-        top2 = y2 - size2;
-        bottom2 = y2 + size2;
-        return !(left1 > right2 || left2 > right1 || top1 > bottom2 || top2 > bottom1);
-    };
+    global.isCollide = function (a, b) {
+        return !(
+        ((a.y + a.height) < (b.y)) ||
+        (a.y > (b.y + b.height * 0.8)) ||
+        ((a.x + a.width * 0.5) < b.x) ||
+        (a.x > (b.x + b.width * 0.9))
+        );
+    }
 })(this);
