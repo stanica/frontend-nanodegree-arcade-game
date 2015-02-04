@@ -33,6 +33,7 @@ var Engine = (function(global) {
         this.canvasHeight = canvas.height;
         this.canvasWidth = canvas.width;
         this.level = 0;
+        this.lives = 3;
 
         /* This array holds the relative URL to the image used
          * for that particular row of the game level. It will
@@ -87,6 +88,9 @@ var Engine = (function(global) {
          * function again as soon as the browser is able to draw another frame.
          */
         win.requestAnimationFrame(main);
+        if (this.lives == 0){
+            reset();
+        }
     };
 
     /* This function does some initial setup that should only occur once,
@@ -124,7 +128,8 @@ var Engine = (function(global) {
         allEnemies.forEach(function(enemy) {
             enemy.update(dt);
         });
-        player.update();
+        player.update(dt);
+        //girlfriend.update(dt);
     }
 
     /* This function initially draws the "game level", it will then call
@@ -179,6 +184,7 @@ var Engine = (function(global) {
         });
 
         player.render();
+        girlfriend.render();
     }
 
     /* This function does nothing but it could have been a good place to
@@ -186,7 +192,10 @@ var Engine = (function(global) {
      * those sorts of things. It's only called once by the init() method.
      */
     function reset() {
-        // noop
+        if (this.lives == 0){
+            alert("Game Over");
+            lives = 3;
+        }
     }
 
     /* Go ahead and load all of the images we know we're going to need to
@@ -200,7 +209,8 @@ var Engine = (function(global) {
         'images/grass-block.png',
         'images/enemy-bug.png',
         'images/char-boy.png',
-        'images/Heart.png'
+        'images/Heart.png',
+        'images/char-pink-girl.png'
     ]);
     Resources.onReady(init);
 
@@ -214,7 +224,7 @@ var Engine = (function(global) {
     global.expandBoard = function (direction) {
         //Add a row to the board by splicing in an image to the array of
         if (direction === "rows"){
-            rowImages.splice(1,0,"images/stone-block.png");
+            rowImages.splice(2,0,"images/stone-block.png");
             numRows = rowImages.length;
         }
         else {

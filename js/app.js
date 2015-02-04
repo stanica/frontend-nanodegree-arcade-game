@@ -38,7 +38,6 @@ var Player = function() {
     this.livesSprite = 'images/Heart.png';
     this.width = 67;
     this.height = 88;
-    this.lives = 3;
     //Center player on board
     this.resetPosition();
 };
@@ -46,16 +45,22 @@ var Player = function() {
 Player.prototype.update = function(dt) {
     for (var x=0; x<allEnemies.length; x++) {
         if (isCollide(this, allEnemies[x])){
-            this.lives --;
-            this.resetPosition();
+           lives --;
+           this.resetPosition();
         }
+    }
+    if (isCollide(this, girlfriend)){
+        levelUp(this);
+        girlfriend.resetPosition();
     }
 };
 
+// Draw player and lives on screen
 Player.prototype.render = function(){
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-    for(var i = 0; i< this.lives; i++){
-        ctx.drawImage(Resources.get(this.livesSprite), (numCols - i - 1) * spriteWidth, 0, 67, 60);
+    // Draw hearts at the top right
+    for(var i = 0; i< lives; i++){
+        ctx.drawImage(Resources.get(this.livesSprite), (numCols - i - 1) * spriteWidth + 15, 15, 67, 60);
     }
 };
 
@@ -66,7 +71,7 @@ Player.prototype.handleInput = function(key) {
     else if (key === "right" && this.x + this.width * 2 <= canvasWidth){
         this.x += spriteWidth;
     }
-    else if (key === "up" && this.y - this.height >= 0){
+    else if (key === "up" && this.y - this.height * 2 >= 0){
         this.y -= 83;
     }
     else if (key === "down" && this.y + 83  < canvasHeight - this.height){
@@ -80,6 +85,26 @@ Player.prototype.resetPosition = function (){
     this.x =  Math.floor(numCols / 2 * spriteWidth) - this.width / 2;
     //Position player on the lowest row of blocks
     this.y = numRows * this.height - this.height*1.5;
+};
+
+var Girlfriend = function () {
+    this.sprite = 'images/char-pink-girl.png';
+    this.width = 76;
+    this.height = 88;
+    this.x =  Math.floor((Math.random() * numCols)) * spriteWidth + 15;
+    this.y = 2 * this.height - 30;
+};
+
+Girlfriend.prototype.render = function() {
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+};
+
+Girlfriend.prototype.update = function(dt) {
+
+};
+
+Girlfriend.prototype.resetPosition = function() {
+    this.x = Math.floor((Math.random() * numCols)) * spriteWidth + 15;
 };
 
 //
@@ -100,6 +125,7 @@ var levelUp = function (player) {
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
 var player = new Player();
+var girlfriend = new Girlfriend();
 var allEnemies = [];
 levelUp(player);
 
