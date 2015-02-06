@@ -33,26 +33,41 @@ Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
+// Set up initial player variables
 var Player = function() {
     this.sprite = 'images/char-boy.png';
     this.livesSprite = 'images/Heart.png';
     this.width = 67;
     this.height = 88;
+
     //Center player on board
     this.resetPosition();
 };
 
+// Handle all collisions between player and all game objects
 Player.prototype.update = function(dt) {
     for (var x=0; x<allEnemies.length; x++) {
         if (isCollide(this, allEnemies[x])){
-           lives --;
-           this.resetPosition();
+          // lives --;
+           //this.resetPosition();
         }
     }
-    if (isCollide(this, girlfriend)){
-        levelUp(this);
-        girlfriend.resetPosition();
-    }
+    gameObjects.forEach(function(entity){
+        if (isCollide(player, entity)){
+            if(entity instanceof Girlfriend){
+                levelUp(this);
+                girlfriend.resetPosition();
+            }
+            else if (entity instanceof Gem){
+                console.log(gameObjects[gameObjects.indexOf(entity)].id);
+                score += entity.value;
+                if (gameObjects[gameObjects.indexOf(entity)].id == entity.id) {
+                    //gameObjects[gameObjects.indexOf(entity)] = "";
+                    gameObjects.splice(gameObjects.indexOf(entity), 1);
+                }
+            }
+        }
+    });
 };
 
 // Draw player and lives on screen
@@ -62,6 +77,8 @@ Player.prototype.render = function(){
     for(var i = 0; i< lives; i++){
         ctx.drawImage(Resources.get(this.livesSprite), (numCols - i - 1) * spriteWidth + 15, 15, 67, 60);
     }
+    ctx.font = "bold 76px Arial";
+    ctx.fillText(score, 0, 70);
 };
 
 Player.prototype.handleInput = function(key) {
@@ -81,20 +98,24 @@ Player.prototype.handleInput = function(key) {
 
 // Reset position of player to center of game board
 Player.prototype.resetPosition = function (){
-    //Center player horizontally by calculating width of board
+    //Place the player in the center of the middle column
     this.x =  Math.floor(numCols / 2 * spriteWidth) - this.width / 2;
     //Position player on the lowest row of blocks
     this.y = numRows * this.height - this.height*1.5;
 };
 
+// Set up initial girlfriend variables
 var Girlfriend = function () {
     this.sprite = 'images/char-pink-girl.png';
     this.width = 76;
     this.height = 88;
-    this.x =  Math.floor((Math.random() * numCols)) * spriteWidth + 15;
+
+    // Pick a random column and center the girlfriend in that column
+    this.x =  Math.floor((Math.random() * numCols)) * spriteWidth + ((spriteWidth - this.width) / 2);
     this.y = 2 * this.height - 30;
 };
 
+// Draw girlfriend on screen
 Girlfriend.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
@@ -103,12 +124,36 @@ Girlfriend.prototype.update = function(dt) {
 
 };
 
+// Reset girlfriend to a random position in the top-most stone row
 Girlfriend.prototype.resetPosition = function() {
-    this.x = Math.floor((Math.random() * numCols)) * spriteWidth + 15;
+    // Pick a random column and center the girlfriend in that column
+    this.x = Math.floor((Math.random() * numCols)) * spriteWidth + ((spriteWidth - this.width) / 2);
 };
 
-//
-var levelUp = function (player) {
+// Set up intial gem variables
+var Gem = function (sprite, value) {
+    this.sprite = sprite;
+    this.value = value;
+    this.width = 51;
+    this.height = 56;
+    this.id = gameObjects.length;
+
+    // Pick a random column and center the gem in that column
+    this.x = Math.floor((Math.random() * numCols)) * spriteWidth + ((spriteWidth - this.width) / 2);
+
+    // Pick a row that isn't the row with the girlfriend
+    this.y = Math.floor(((Math.random() * (numRows - 5)) + 3)) * spriteHeight + ((spriteHeight - this.height) / 2 );
+};
+
+Gem.prototype.render = function() {
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y, this.width, this.height);
+}
+
+// Handle level up logic
+var levelUp = function () {
+    var orangeGem = new Gem('images/Gem-Orange.png', 100);
+
+    gameObjects.push(orangeGem);
     level++;
     if (level > 1 && level < 4){
         expandBoard("rows");
@@ -126,9 +171,11 @@ var levelUp = function (player) {
 // Place the player object in a variable called player
 var player = new Player();
 var girlfriend = new Girlfriend();
+//var orangeGem;
+var gameObjects = [];
+gameObjects.push(girlfriend);
 var allEnemies = [];
-levelUp(player);
-
+levelUp();
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
 document.addEventListener('keyup', function(e) {

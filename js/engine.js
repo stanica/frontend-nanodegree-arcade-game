@@ -25,15 +25,16 @@ var Engine = (function(global) {
         ctx = canvas.getContext('2d'),
         lastTime;
 
-        // Used for horizontal movement and as width of a tile
+        // Width of a block tile
         this.spriteWidth = 101;
 
-        // Used for vertical movement
-        this.spriteHeight = 171;
-        this.canvasHeight = canvas.height;
-        this.canvasWidth = canvas.width;
+        // Height of a block tile
+        this.spriteHeight = 82;
+
+        // Global game variables
         this.level = 0;
         this.lives = 3;
+        this.score = 0;
 
         /* This array holds the relative URL to the image used
          * for that particular row of the game level. It will
@@ -48,16 +49,17 @@ var Engine = (function(global) {
             'images/grass-block.png',   // Row 1 of 2 of grass
             'images/grass-block.png'    // Row 2 of 2 of grass
         ];
+    
 
-        /* Used to calculate positioning. Canvas width will be a
-         * function of
+        /* Used to calculate positioning. Canvas width will be
+         * the number of columns x the width of a block sprite
          */
         this.numCols = 5;
         this.numRows = rowImages.length;
-
-        canvas.width = 505;
         canvas.height = numRows * spriteHeight * 0.58;
         this.canvasHeight = canvas.height;
+        this.canvasWidth = canvas.width;
+
         doc.body.appendChild(canvas);
 
     /* This function serves as the kickoff point for the game loop itself
@@ -179,12 +181,16 @@ var Engine = (function(global) {
         /* Loop through all of the objects within the allEnemies array and call
          * the render function you have defined.
          */
+        gameObjects.forEach(function(entities) {
+            entities.render();
+        });
+        //girlfriend.render();
+        //orangeGem.render();
         allEnemies.forEach(function(enemy) {
             enemy.render();
         });
 
         player.render();
-        girlfriend.render();
     }
 
     /* This function does nothing but it could have been a good place to
@@ -207,10 +213,11 @@ var Engine = (function(global) {
         'images/stone-block.png',
         'images/water-block.png',
         'images/grass-block.png',
+        'images/char-pink-girl.png',
         'images/enemy-bug.png',
         'images/char-boy.png',
         'images/Heart.png',
-        'images/char-pink-girl.png'
+        'images/Gem-Orange.png'
     ]);
     Resources.onReady(init);
 
