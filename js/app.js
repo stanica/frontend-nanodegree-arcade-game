@@ -1,18 +1,25 @@
 // Enemies our player must avoid
-var Enemy = function() {
+var Enemy = function(row) {
     // Variables applied to each of our instances go here,
     // we've provided one for you to get started
 
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
     this.sprite = 'images/enemy-bug.png';
+
+    this.row = row;
+    //1 = facing right, -1 = facing left
+    this.direction = 1;
     //Position enemy just off-screen and randomly between the water and grass
-    this.x = -spriteWidth;
-    this.y = Math.floor(((Math.random()*(numRows-4))))*83 + 83*2;
-    this.speed = Math.floor( (Math.random()*3)*100 + 200 );
+    this.x = -spriteWidth * (Math.floor(Math.random() * 3) +1);
+    //this.y = Math.floor(((Math.random()*(numRows-4))))*83 + 83*2;
+    this.y = ( row) * 83 + 83*2;
+
+    //this.speed = Math.floor( (Math.random()*3)*100 + 200 );
+    this.speed = (numRows - row) * 100 - ((numRows - row) * 100) / 2.5;
 };
 
-// Update the enemy's position, required method for game
+    // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
 Enemy.prototype.update = function(dt) {
     // You should multiply any movement by the dt parameter
@@ -20,9 +27,10 @@ Enemy.prototype.update = function(dt) {
     // all computers.
     this.x += this.speed * dt;
     if (this.x > canvasWidth){
-        this.x = -spriteWidth;
+        this.x = -spriteWidth * (Math.floor(Math.random() * Math.floor(this.speed/100)) +1);
         //Randomize vertical position of the enemy to be between the water and grass tiles
-        this.y = Math.floor(((Math.random()*(numRows-4))))*83 + 83*2;
+        //this.y = Math.floor(((Math.random()*(numRows-4))))*83 + 83*2;
+        this.y = (this.row) * 83 + 83*2;
     }
     this.width = spriteWidth;
     this.height = 77;
@@ -49,7 +57,7 @@ Player.prototype.update = function(dt) {
     for (var x=0; x<allEnemies.length; x++) {
         if (isCollide(this, allEnemies[x])){
           // lives --;
-           //this.resetPosition();
+           this.resetPosition();
         }
     }
     gameObjects.forEach(function(entity){
@@ -59,7 +67,6 @@ Player.prototype.update = function(dt) {
                 girlfriend.resetPosition();
             }
             else if (entity instanceof Gem){
-                console.log(gameObjects[gameObjects.indexOf(entity)].id);
                 score += entity.value;
                 if (gameObjects[gameObjects.indexOf(entity)].id == entity.id) {
                     //gameObjects[gameObjects.indexOf(entity)] = "";
@@ -151,16 +158,17 @@ Gem.prototype.render = function() {
 
 // Handle level up logic
 var levelUp = function () {
+    console.log(" ");
     var orangeGem = new Gem('images/Gem-Orange.png', 100);
-
+    var enemy;
     gameObjects.push(orangeGem);
     level++;
-    if (level > 1 && level < 4){
+    if (level > 1 && level < 6){
         expandBoard("rows");
     }
     allEnemies = [];
-    for (var x=0; x<level*3; x++) {
-        var enemy = new Enemy();
+    for (var x=0; x<numRows-4; x++) {
+        enemy = new Enemy(x);
         allEnemies.push(enemy);
     }
     player.resetPosition();
@@ -176,6 +184,7 @@ var gameObjects = [];
 gameObjects.push(girlfriend);
 var allEnemies = [];
 levelUp();
+
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
 document.addEventListener('keyup', function(e) {

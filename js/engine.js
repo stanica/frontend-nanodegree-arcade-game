@@ -246,9 +246,9 @@ var Engine = (function(global) {
     global.isCollide = function (a, b) {
         return !(
         ((a.y + a.height) < (b.y)) ||
-        (a.y > (b.y + b.height * 0.8)) ||
-        ((a.x + a.width * 0.5) < b.x) ||
-        (a.x > (b.x + b.width * 0.9))
+        (a.y > (b.y + b.height - 20)) ||
+        ((a.x + a.width) < b.x) ||
+        (a.x > (b.x + b.width))
         );
     }
 })(this);
