@@ -25,10 +25,10 @@ var Engine = (function(global) {
         ctx = canvas.getContext('2d'),
         lastTime;
 
-        // Width of a block tile
+        // Default width of a block tile
         this.spriteWidth = 101;
 
-        // Height of a block tile
+        // Default height of a block tile
         this.spriteHeight = 82;
 
         // Global game variables
@@ -41,7 +41,7 @@ var Engine = (function(global) {
          * increase in length as the game level increases.
          */
         var rowImages = [
-            'images/blank-block.png',
+            'images/blank-block.png',   // Blank row to display score and lives
             'images/water-block.png',   // Top row is water
             'images/stone-block.png',   // Row 1 of 3 of stone
             'images/stone-block.png',   // Row 2 of 3 of stone
@@ -49,16 +49,24 @@ var Engine = (function(global) {
             'images/grass-block.png',   // Row 1 of 2 of grass
             'images/grass-block.png'    // Row 2 of 2 of grass
         ];
-    
 
-        /* Used to calculate positioning. Canvas width will be
-         * the number of columns x the width of a block sprite
+
+        /* numCols and numRows are used to calculate positioning. Canvas width
+         * will be the number of columns x the width of a block sprite
          */
         this.numCols = 5;
         this.numRows = rowImages.length;
+        this.maxRows = 11;
         canvas.height = numRows * spriteHeight * 0.58;
         this.canvasHeight = canvas.height;
         this.canvasWidth = canvas.width;
+
+        //this.scaleFactorY = Math.floor(window.innerHeight / (spriteHeight + 10)) / numRows;
+        this.scaleFactorHeight = calculateScaling(this.numRows);
+
+        // Update width and height based on scale factor
+        this.spriteWidth = 101 * this.scaleFactorHeight;
+        this.spriteHeight = 82 * this.scaleFactorHeight;
 
         doc.body.appendChild(canvas);
 
@@ -131,7 +139,6 @@ var Engine = (function(global) {
             enemy.update(dt);
         });
         player.update(dt);
-        //girlfriend.update(dt);
     }
 
     /* This function initially draws the "game level", it will then call
@@ -153,7 +160,7 @@ var Engine = (function(global) {
          * to display the bottom of the last block.
          */
         canvas.width = numCols * spriteWidth;
-        canvas.height = numRows * 83 + 38;
+        canvas.height = (numRows * spriteHeight + 38);
         this.canvasWidth = canvas.width;
         this.canvasHeight = canvas.height;
 
@@ -167,7 +174,7 @@ var Engine = (function(global) {
                 * 121 pixels of the 171 pixel image height, offset the blocks by
                 * displaying them 50 pixels higher.
                 */
-                ctx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83-50);
+                ctx.drawImage(Resources.get(rowImages[row]), col * spriteWidth, (row * spriteHeight-50*this.scaleFactorHeight), spriteWidth, 171*this.scaleFactorHeight);
             }
         }
         renderEntities();
@@ -204,6 +211,16 @@ var Engine = (function(global) {
         }
     }
 
+    function calculateScaling(rows){
+        var factor = Math.floor(window.innerHeight / (spriteHeight + 10)) / maxRows;
+        if (factor >= 1) {
+            return 1;
+        }
+        else {
+            return factor;
+        }
+    }
+
     /* Go ahead and load all of the images we know we're going to need to
      * draw our game level. Then set init as the callback method, so that when
      * all of these images are properly loaded our game will start.
@@ -217,7 +234,8 @@ var Engine = (function(global) {
         'images/enemy-bug.png',
         'images/char-boy.png',
         'images/Heart.png',
-        'images/Gem-Orange.png'
+        'images/Gem-Orange.png',
+        'images/Gem-Blue.png'
     ]);
     Resources.onReady(init);
 
@@ -246,7 +264,7 @@ var Engine = (function(global) {
     global.isCollide = function (a, b) {
         return !(
         ((a.y + a.height) < (b.y)) ||
-        (a.y > (b.y + b.height - 20)) ||
+        (a.y > (b.y + b.height/2)) ||
         ((a.x + a.width) < b.x) ||
         (a.x > (b.x + b.width))
         );
