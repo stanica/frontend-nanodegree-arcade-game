@@ -1,6 +1,14 @@
-frontend-nanodegree-arcade-game
-===============================
+Frogger clone
+=============
 
-Students should use this rubric: https://www.udacity.com/course/viewer#!/c-ud015/l-3072058665/m-3072588797
+Features:
 
-for self-checking their submission.
+* 2 enemy types with different behaviors
+* Game mode: save the girlfriend! 
+* Automatic resolution scaling
+* Multiple levels with increasing difficulty
+* Collectable gems worth varying points
+
+Instructions:
+
+Use the WASD keys to move. Get your character across the street and to his girlfriend to level up. Avoid the bugs and collect gems to gain points.
