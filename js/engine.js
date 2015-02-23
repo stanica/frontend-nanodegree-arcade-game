@@ -61,7 +61,7 @@ var Engine = (function(global) {
         this.canvasHeight = canvas.height;
         this.canvasWidth = canvas.width;
 
-        //this.scaleFactorY = Math.floor(window.innerHeight / (spriteHeight + 10)) / numRows;
+        // Used to scale game sprites to fit up to maxRows rows on screen at once
         this.scaleFactorHeight = calculateScaling(this.numRows);
 
         // Update width and height based on scale factor
@@ -160,7 +160,7 @@ var Engine = (function(global) {
          * to display the bottom of the last block.
          */
         canvas.width = numCols * spriteWidth;
-        canvas.height = (numRows * spriteHeight + 38);
+        canvas.height = (numRows * spriteHeight + 38 * this.scaleFactorHeight);
         this.canvasWidth = canvas.width;
         this.canvasHeight = canvas.height;
 
@@ -185,14 +185,12 @@ var Engine = (function(global) {
      * on your enemy and player entities within app.js
      */
     function renderEntities() {
-        /* Loop through all of the objects within the allEnemies array and call
-         * the render function you have defined.
+        /* Loop through the list of non-enemy game objects and render them. Game
+         * objects include the girlfriend and gems
          */
         gameObjects.forEach(function(entities) {
             entities.render();
         });
-        //girlfriend.render();
-        //orangeGem.render();
         allEnemies.forEach(function(enemy) {
             enemy.render();
         });
@@ -211,6 +209,8 @@ var Engine = (function(global) {
         }
     }
 
+    // Calculate factor by which to scale all sprites such that maxRows fit on screen
+    // at once.
     function calculateScaling(rows){
         var factor = Math.floor(window.innerHeight / (spriteHeight + 10)) / maxRows;
         if (factor >= 1) {
@@ -232,6 +232,7 @@ var Engine = (function(global) {
         'images/grass-block.png',
         'images/char-pink-girl.png',
         'images/enemy-bug.png',
+        'images/enemy-bug2.png',
         'images/char-boy.png',
         'images/Heart.png',
         'images/Gem-Orange.png',
